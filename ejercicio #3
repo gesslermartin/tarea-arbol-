@@ -1,0 +1,82 @@
+El recorrido Postorden visita: subárbol izquierdo → subárbol derecho → raíz.
+
+Como la raíz se visita al final, el último valor de [2, 7, 5, 12, 17, 15, 10] es la raíz: 10. El resto se separa en dos mitades, la izquierda con valores menores que 10 y la derecha con mayores:
+
+Izquierda: 2, 7, 5, que es el subárbol de raíz 5 con hijos 2 y 7.
+Derecha: 12, 17, 15, que es el subárbol de raíz 15 con hijos 12 y 17.
+El árbol sería:
+
+        (10)
+       /    \
+    (5)      (15)
+   /   \     /   \
+ (2)  (7) (12)  (17)
+ Verificación del orden:
+
+Izquierda de 10: se visita 2, luego 7, luego 5.
+Derecha de 10: se visita 12, luego 17, luego 15.
+Raíz: 10.
+
+Resultado: [2, 7, 5, 12, 17, 15, 10].
+
+Si tu Ejemplo 2 tiene otro dibujo, dímelo, pero esta solución solo encaja con un árbol así.
+
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izquierdo = None
+        self.derecho = None
+
+
+class ArbolBinarioBusqueda:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, valor):
+        self.raiz = self._insertar(self.raiz, valor)
+
+    def _insertar(self, nodo, valor):
+        if nodo is None:
+            return Nodo(valor)
+        if valor < nodo.valor:
+            nodo.izquierdo = self._insertar(nodo.izquierdo, valor)
+        elif valor > nodo.valor:
+            nodo.derecho = self._insertar(nodo.derecho, valor)
+        return nodo
+
+    # --- Postorden recursivo ---
+    def postorden(self):
+        resultado = []
+        self._postorden(self.raiz, resultado)
+        return resultado
+
+    def _postorden(self, nodo, resultado):
+        if nodo is None:
+            return
+        self._postorden(nodo.izquierdo, resultado)  # 1. izquierda
+        self._postorden(nodo.derecho, resultado)    # 2. derecha
+        resultado.append(nodo.valor)                # 3. raíz
+
+    # --- Postorden iterativo (con dos pilas) ---
+    def postorden_iterativo(self):
+        if self.raiz is None:
+            return []
+        pila1 = [self.raiz]
+        pila2 = []
+        while pila1:
+            nodo = pila1.pop()
+            pila2.append(nodo)
+            if nodo.izquierdo:
+                pila1.append(nodo.izquierdo)
+            if nodo.derecho:
+                pila1.append(nodo.derecho)
+        return [n.valor for n in reversed(pila2)]
+
+
+# Construir el árbol del ejemplo
+arbol = ArbolBinarioBusqueda()
+for x in [10, 5, 15, 2, 7, 12, 17]:
+    arbol.insertar(x)
+
+print("Postorden recursivo: ", arbol.postorden())
+print("Postorden iterativo: ", arbol.postorden_iterativo())
