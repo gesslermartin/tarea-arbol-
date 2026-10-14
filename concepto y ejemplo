@@ -1,0 +1,41 @@
+Concepto
+
+Un recorrido de un árbol es una forma de visitar todos los nodos exactamente una vez. En un árbol binario hay tres recorridos en profundidad, y se diferencian en cuándo se visita la raíz respecto a sus subárboles:
+
+Recorrido	Orden	Regla para recordarlo
+Preorden	Raíz → Izquierda → Derecha	La raíz va antes
+Inorden	Izquierda → Raíz → Derecha	La raíz va en medio
+Postorden	Izquierda → Derecha → Raíz	La raíz va después
+
+Los tres son recursivos: para cada nodo aplicas la misma regla a su subárbol izquierdo y a su subárbol derecho.
+
+Postorden en particular: primero se procesan los hijos y al final el padre. Por eso la raíz del árbol siempre es el último valor del resultado. Se usa, por ejemplo, para eliminar un árbol (hay que borrar los hijos antes que el padre) o para evaluar expresiones matemáticas.
+
+Dato útil: en un ABB, el recorrido Inorden devuelve los valores ordenados de menor a mayor.
+
+Ejemplo
+
+Tomemos el árbol del ejercicio:
+        (10)
+       /    \
+    (5)      (15)
+   /   \     /   \
+ (2)  (7) (12)  (17)
+          Postorden (Izq → Der → Raíz), paso a paso:
+
+Desde el 10, vamos a su izquierda: nodo 5.
+Desde el 5, vamos a su izquierda: nodo 2. No tiene hijos, así que se visita: 2.
+Volvemos al 5 y vamos a su derecha: nodo 7. No tiene hijos, se visita: 7.
+Ya terminaron los dos hijos del 5, entonces se visita el 5: 5.
+Volvemos al 10 y vamos a su derecha: nodo 15.
+Desde el 15, izquierda: nodo 12, se visita: 12.
+Derecha del 15: nodo 17, se visita: 17.
+Terminaron los hijos del 15, se visita el 15: 15.
+Terminaron los dos subárboles del 10, se visita la raíz: 10.
+
+Resultado Postorden: [2, 7, 5, 12, 17, 15, 10]
+
+Los otros dos recorridos con el mismo árbol, para comparar:
+
+Preorden (Raíz → Izq → Der): [10, 5, 2, 7, 15, 12, 17]
+Inorden (Izq → Raíz → Der): [2, 5, 7, 10, 12, 15, 17] (ordenado, como dijimos)
