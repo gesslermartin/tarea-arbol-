@@ -1,0 +1,311 @@
+SISTEMA DE CONTROL DE TRANSPORTE
+# Lenguaje: Python
+# Almacenamiento: Listas
+# ==========================================
+
+# Listas principales del sistema
+conductores = []
+vehiculos = []
+viajes = []
+combustibles = []
+
+
+# ------------------------------------------
+# FUNCIONES AUXILIARES
+# ------------------------------------------
+
+def ingresar_numero(mensaje):
+    while True:
+        try:
+            numero = int(input(mensaje))
+            if numero > 0:
+                return numero
+            print("Ingrese un numero mayor que cero.")
+        except ValueError:
+            print("Error: debe ingresar un numero entero.")
+
+
+def ingresar_decimal(mensaje):
+    while True:
+        try:
+            numero = float(input(mensaje))
+            if numero > 0:
+                return numero
+            print("Ingrese un valor mayor que cero.")
+        except ValueError:
+            print("Error: ingrese un numero valido.")
+
+
+def ingresar_texto(mensaje):
+    while True:
+        texto = input(mensaje).strip()
+        if texto:
+            return texto
+        print("Este campo no puede quedar vacio.")
+
+
+def buscar_conductor(cedula):
+    for conductor in conductores:
+        if conductor["cedula"] == cedula:
+            return conductor
+    return None
+
+
+def buscar_vehiculo(placa):
+    for vehiculo in vehiculos:
+        if vehiculo["placa"] == placa:
+            return vehiculo
+    return None
+
+
+# ------------------------------------------
+# 1. REGISTRAR CONDUCTOR
+# ------------------------------------------
+
+def registrar_conductor():
+    print("\n--- REGISTRO DE CONDUCTOR ---")
+
+    cedula = ingresar_texto("Cedula: ")
+
+    if buscar_conductor(cedula):
+        print("Esta cedula ya esta registrada.")
+        return
+
+    nombre = ingresar_texto("Nombre completo: ")
+    licencia = ingresar_texto("Numero de licencia: ")
+
+    conductor = {
+        "cedula": cedula,
+        "nombre": nombre,
+        "licencia": licencia
+    }
+
+    conductores.append(conductor)
+    print("Conductor registrado correctamente.")
+
+
+# ------------------------------------------
+# 2. REGISTRAR VEHICULO
+# ------------------------------------------
+
+def registrar_vehiculo():
+    print("\n--- REGISTRO DE VEHICULO ---")
+
+    placa = ingresar_texto("Placa: ").upper()
+
+    if buscar_vehiculo(placa):
+        print("Esta placa ya esta registrada.")
+        return
+
+    modelo = ingresar_texto("Modelo del vehiculo: ")
+    capacidad = ingresar_numero("Capacidad de pasajeros: ")
+
+    vehiculo = {
+        "placa": placa,
+        "modelo": modelo,
+        "capacidad": capacidad
+    }
+
+    vehiculos.append(vehiculo)
+    print("Vehiculo registrado correctamente.")
+
+
+# ------------------------------------------
+# 3. REGISTRAR VIAJE
+# ------------------------------------------
+
+def registrar_viaje():
+    print("\n--- REGISTRO DE VIAJE ---")
+
+    if not conductores or not vehiculos:
+        print("Primero registre un conductor y un vehiculo.")
+        return
+
+    cedula = ingresar_texto("Cedula del conductor: ")
+    conductor = buscar_conductor(cedula)
+
+    if conductor is None:
+        print("El conductor no existe.")
+        return
+
+    placa = ingresar_texto("Placa del vehiculo: ").upper()
+    vehiculo = buscar_vehiculo(placa)
+
+    if vehiculo is None:
+        print("El vehiculo no existe.")
+        return
+
+    fecha = ingresar_texto("Fecha (DD/MM/AAAA): ")
+    origen = ingresar_texto("Lugar de origen: ")
+    destino = ingresar_texto("Lugar de destino: ")
+
+    viaje = {
+        "fecha": fecha,
+        "conductor": conductor["nombre"],
+        "placa": placa,
+        "origen": origen,
+        "destino": destino
+    }
+
+    viajes.append(viaje)
+    print("Viaje registrado correctamente.")
+
+
+# ------------------------------------------
+# 4. REGISTRAR COMBUSTIBLE
+# ------------------------------------------
+
+def registrar_combustible():
+    print("\n--- REGISTRO DE COMBUSTIBLE ---")
+
+    if not vehiculos:
+        print("Primero registre un vehiculo.")
+        return
+
+    placa = ingresar_texto("Placa del vehiculo: ").upper()
+
+    if buscar_vehiculo(placa) is None:
+        print("El vehiculo no existe.")
+        return
+
+    fecha = ingresar_texto("Fecha (DD/MM/AAAA): ")
+    galones = ingresar_decimal("Cantidad de galones: ")
+    precio = ingresar_decimal("Precio por galon en cordobas: ")
+
+    total = galones * precio
+
+    combustible = {
+        "placa": placa,
+        "fecha": fecha,
+        "galones": galones,
+        "precio": precio,
+        "total": total
+    }
+
+    combustibles.append(combustible)
+
+    print(f"Gasto registrado: C$ {total:.2f}")
+
+
+# ------------------------------------------
+# 5. CONSULTAR GASTOS
+# ------------------------------------------
+
+def consultar_gastos():
+    print("\n--- GASTOS DE COMBUSTIBLE ---")
+
+    if not combustibles:
+        print("No hay gastos registrados.")
+        return
+
+    total_general = 0
+
+    for gasto in combustibles:
+        print(
+            f"Placa: {gasto['placa']} | "
+            f"Fecha: {gasto['fecha']} | "
+            f"Galones: {gasto['galones']:.2f} | "
+            f"Total: C$ {gasto['total']:.2f}"
+        )
+        total_general += gasto["total"]
+
+    print("-" * 45)
+    print(f"Total de combustible: C$ {total_general:.2f}")
+
+
+# ------------------------------------------
+# 6. BUSCAR VIAJES POR FECHA
+# ------------------------------------------
+
+def buscar_viajes_fecha():
+    print("\n--- BUSCAR VIAJES POR FECHA ---")
+
+    fecha = ingresar_texto("Ingrese fecha (DD/MM/AAAA): ")
+    encontrados = 0
+
+    for viaje in viajes:
+        if viaje["fecha"] == fecha:
+            print(
+                f"Conductor: {viaje['conductor']} | "
+                f"Vehiculo: {viaje['placa']} | "
+                f"Ruta: {viaje['origen']} - {viaje['destino']}"
+            )
+            encontrados += 1
+
+    if encontrados == 0:
+        print("No se encontraron viajes en esa fecha.")
+    else:
+        print(f"Total de viajes encontrados: {encontrados}")
+
+
+# ------------------------------------------
+# 7. MOSTRAR REPORTES
+# ------------------------------------------
+
+def mostrar_reportes():
+    print("\n--- REPORTE GENERAL ---")
+
+    total_gastos = 0
+
+    for gasto in combustibles:
+        total_gastos += gasto["total"]
+
+    print(f"Conductores registrados: {len(conductores)}")
+    print(f"Vehiculos registrados: {len(vehiculos)}")
+    print(f"Viajes realizados: {len(viajes)}")
+    print(f"Registros de combustible: {len(combustibles)}")
+    print(f"Gasto total en combustible: C$ {total_gastos:.2f}")
+
+    if viajes:
+        print("\nDETALLE DE VIAJES")
+
+        for viaje in viajes:
+            print(
+                f"{viaje['fecha']} | "
+                f"{viaje['conductor']} | "
+                f"{viaje['placa']} | "
+                f"{viaje['origen']} - {viaje['destino']}"
+            )
+
+
+# ------------------------------------------
+# 8. MENU PRINCIPAL
+# ------------------------------------------
+
+def menu_principal():
+    while True:
+        print("\n" + "=" * 42)
+        print("   SISTEMA DE CONTROL DE TRANSPORTE")
+        print("=" * 42)
+        print("1. Registrar conductor")
+        print("2. Registrar vehiculo")
+        print("3. Registrar viaje")
+        print("4. Registrar combustible")
+        print("5. Consultar gastos")
+        print("6. Buscar viajes por fecha")
+        print("7. Mostrar reportes")
+        print("8. Salir")
+        print("=" * 42)
+
+        opcion = input("Seleccione una opcion: ").strip()
+
+        if opcion == "1":
+            registrar_conductor()
+        elif opcion == "2":
+            registrar_vehiculo()
+        elif opcion == "3":
+            registrar_viaje()
+        elif opcion == "4":
+            registrar_combustible()
+        elif opcion == "5":
+            consultar_gastos()
+        elif opcion == "6":
+            buscar_viajes_fecha()
+        elif opcion == "7":
+            mostrar_reportes()
+        elif opcion == "8":
+            print("Gracias por utilizar el sistema.")
+            print("Programa finalizado.")
+            break
+        else:
+            print("Opcion no valida. Intente nuevamente.")
