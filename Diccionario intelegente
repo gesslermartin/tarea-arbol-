@@ -1,0 +1,243 @@
+"""Diccionario Inteligente con Árbol Binario de Búsqueda (BST).
+
+- Cada nodo guarda un objeto Palabra (texto + definición).
+- El orden es alfabético, ignorando mayúsculas y tildes (la ñ va entre n y o).
+- Soporta búsqueda exacta, autocompletado por prefijo y listado en orden.
+"""
+
+import unicodedata
+
+
+def normalizar(texto: str) -> str:
+    """Clave de comparación: minúsculas, sin tildes, con 'ñ' ordenada después de 'n'."""
+    texto = texto.strip().lower().replace("ñ", "n{")  # '{' > 'z' pero < 'o'... tras la 'n'
+    texto = unicodedata.normalize("NFD", texto)
+    return "".join(c for c in texto if unicodedata.category(c) != "Mn")
+
+
+class Palabra:
+    def __init__(self, texto: str, definicion: str):
+        self.texto = texto
+        self.definicion = definicion
+        self.clave = normalizar(texto)
+
+    def __str__(self):
+        return f"{self.texto}: {self.definicion}"
+
+
+class Nodo:
+    def __init__(self, palabra: Palabra):
+        self.palabra = palabra
+        self.izq = None
+        self.der = None
+
+
+class DiccionarioBST:
+    def __init__(self):
+        self.raiz = None
+        self.tamano = 0
+
+    # ---------- Inserción ----------
+    def insertar(self, palabra: Palabra) -> None:
+        """Inserta la palabra; si ya existe, actualiza su definición."""
+        nuevo = Nodo(palabra)
+        if self.raiz is None:
+            self.raiz = nuevo
+            self.tamano = 1
+            return
+        actual = self.raiz
+        while True:
+            if palabra.clave == actual.palabra.clave:
+                actual.palabra = palabra
+                return
+            if palabra.clave < actual.palabra.clave:
+                if actual.izq is None:
+                    actual.izq = nuevo
+                    break
+                actual = actual.izq
+            else:
+                if actual.der is None:
+                    actual.der = nuevo
+                    break
+                actual = actual.der
+        self.tamano += 1
+
+    def cargar_balanceado(self, palabras: list) -> None:
+        """Inserta empezando por la mediana para evitar un árbol degenerado."""
+        ordenadas = sorted(palabras, key=lambda p: p.clave)
+
+        def insertar_rango(lo, hi):
+            if lo > hi:
+                return
+            medio = (lo + hi) // 2
+            self.insertar(ordenadas[medio])
+            insertar_rango(lo, medio - 1)
+            insertar_rango(medio + 1, hi)
+
+        insertar_rango(0, len(ordenadas) - 1)
+
+    # ---------- Búsqueda exacta ----------
+    def buscar(self, texto: str):
+        clave = normalizar(texto)
+        actual = self.raiz
+        while actual:
+            if clave == actual.palabra.clave:
+                return actual.palabra
+            actual = actual.izq if clave < actual.palabra.clave else actual.der
+        return None
+
+    # ---------- Búsqueda por prefijo ----------
+    def buscar_por_prefijo(self, prefijo: str) -> list:
+        """Retorna (en orden alfabético) todas las palabras que empiezan con el prefijo."""
+        p = normalizar(prefijo)
+        resultado = []
+        if not p:
+            return resultado
+
+        def recorrer(nodo):
+            if nodo is None:
+                return
+            k = nodo.palabra.clave
+            if k.startswith(p):
+                recorrer(nodo.izq)
+                resultado.append(nodo.palabra)
+                recorrer(nodo.der)
+            elif p < k:  # todas las coincidencias están a la izquierda
+                recorrer(nodo.izq)
+            else:        # todas las coincidencias están a la derecha
+                recorrer(nodo.der)
+
+        recorrer(self.raiz)
+        return resultado
+
+    # ---------- Recorrido en orden ----------
+    def en_orden(self) -> list:
+        resultado, pila, actual = [], [], self.raiz
+        while pila or actual:
+            while actual:
+                pila.append(actual)
+                actual = actual.izq
+            actual = pila.pop()
+            resultado.append(actual.palabra)
+            actual = actual.der
+        return resultado
+
+
+# ---------- Datos iniciales (60 palabras) ----------
+PALABRAS_INICIALES = {
+    "abeja": "Insecto que produce miel y cera.",
+    "abrigo": "Prenda de vestir que protege del frío.",
+    "aula": "Sala donde se imparten clases.",
+    "aurora": "Luz rosada que aparece en el cielo antes de salir el sol.",
+    "autonomía": "Capacidad de actuar y decidir por uno mismo.",
+    "auto": "Vehículo de motor para transportar personas.",
+    "autor": "Persona que crea una obra literaria, científica o artística.",
+    "avión": "Aeronave con alas que vuela propulsada por motores.",
+    "barco": "Embarcación que navega sobre el agua.",
+    "biblioteca": "Lugar donde se guardan y prestan libros.",
+    "bosque": "Terreno extenso poblado de árboles.",
+    "caballo": "Mamífero domesticado usado para montar y carga.",
+    "cafetera": "Aparato para preparar café.",
+    "camino": "Vía por la que se transita.",
+    "ciudad": "Población grande con muchos habitantes y servicios.",
+    "computadora": "Máquina electrónica que procesa información.",
+    "dado": "Cubo con puntos del uno al seis usado en juegos.",
+    "delfín": "Mamífero marino inteligente de hocico alargado.",
+    "desierto": "Región árida con muy pocas lluvias.",
+    "dinero": "Medio de pago aceptado para comprar bienes y servicios.",
+    "elefante": "Mamífero terrestre más grande, con trompa y colmillos.",
+    "escuela": "Establecimiento donde se enseña a los alumnos.",
+    "estrella": "Cuerpo celeste que brilla con luz propia.",
+    "familia": "Grupo de personas unidas por parentesco.",
+    "feliz": "Que siente alegría y satisfacción.",
+    "flor": "Parte de la planta que contiene los órganos reproductores.",
+    "gato": "Mamífero felino doméstico.",
+    "guitarra": "Instrumento musical de cuerdas con caja de resonancia.",
+    "hormiga": "Insecto social que vive en colonias.",
+    "hospital": "Establecimiento donde se atiende a los enfermos.",
+    "isla": "Porción de tierra rodeada de agua.",
+    "jardín": "Terreno donde se cultivan plantas ornamentales.",
+    "lago": "Gran masa de agua dulce rodeada de tierra.",
+    "libro": "Conjunto de hojas impresas y encuadernadas.",
+    "luna": "Satélite natural de la Tierra.",
+    "mar": "Gran extensión de agua salada.",
+    "montaña": "Gran elevación natural del terreno.",
+    "música": "Arte de combinar sonidos de forma agradable.",
+    "nube": "Masa visible de vapor de agua en la atmósfera.",
+    "niño": "Persona que está en la niñez.",
+    "ñandú": "Ave corredora sudamericana parecida al avestruz.",
+    "ojo": "Órgano de la vista.",
+    "pájaro": "Ave de pequeño tamaño.",
+    "pan": "Alimento hecho con harina, agua y levadura.",
+    "playa": "Ribera del mar cubierta de arena.",
+    "puente": "Construcción que permite cruzar un río o un valle.",
+    "queso": "Alimento sólido elaborado con leche cuajada.",
+    "río": "Corriente continua de agua que desemboca en el mar o un lago.",
+    "sol": "Estrella central del sistema solar.",
+    "tecnología": "Conjunto de conocimientos técnicos aplicados a un fin práctico.",
+    "tierra": "Planeta que habitamos.",
+    "universidad": "Institución de enseñanza superior.",
+    "valle": "Llanura entre montañas.",
+    "ventana": "Abertura en una pared para dar luz y ventilación.",
+    "viento": "Corriente de aire en movimiento.",
+    "volcán": "Montaña que expulsa lava y ceniza.",
+    "xilófono": "Instrumento musical de láminas de madera que se golpean.",
+    "yate": "Embarcación de recreo de lujo.",
+    "zapato": "Calzado que cubre el pie.",
+    "zorro": "Mamífero carnívoro de cola larga y espesa.",
+}
+
+
+def cargar_desde_archivo(ruta: str) -> list:
+    """Opcional: carga líneas con formato 'palabra:definición' desde un .txt."""
+    palabras = []
+    with open(ruta, encoding="utf-8") as f:
+        for linea in f:
+            if ":" in linea:
+                t, d = linea.split(":", 1)
+                palabras.append(Palabra(t.strip(), d.strip()))
+    return palabras
+
+
+def menu():
+    dic = DiccionarioBST()
+    dic.cargar_balanceado([Palabra(t, d) for t, d in PALABRAS_INICIALES.items()])
+    print(f"Diccionario cargado con {dic.tamano} palabras.")
+
+    while True:
+        print("\n=== DICCIONARIO INTELIGENTE ===")
+        print("1. Buscar palabra exacta")
+        print("2. Autocompletar por prefijo")
+        print("3. Ver diccionario completo (A-Z)")
+        print("4. Salir")
+        opcion = input("Elige una opción: ").strip()
+
+        if opcion == "1":
+            texto = input("Palabra: ")
+            p = dic.buscar(texto)
+            if p:
+                print(f"\n{p}")
+            else:
+                print("Palabra no encontrada.")
+                sugeridas = dic.buscar_por_prefijo(texto[:2]) if len(texto) >= 2 else []
+                if sugeridas:
+                    print("¿Quisiste decir?: " + ", ".join(s.texto for s in sugeridas[:5]))
+        elif opcion == "2":
+            prefijo = input("Prefijo: ")
+            res = dic.buscar_por_prefijo(prefijo)
+            if res:
+                print(f"\n{len(res)} resultado(s): " + ", ".join(p.texto for p in res))
+            else:
+                print("Sin coincidencias.")
+        elif opcion == "3":
+            for p in dic.en_orden():
+                print(f"- {p}")
+        elif opcion == "4":
+            print("¡Hasta pronto!")
+            break
+        else:
+            print("Opción inválida.")
+
+
+if __name__ == "__main__":
+    menu()
