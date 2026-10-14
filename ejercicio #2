@@ -1,0 +1,51 @@
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izquierdo = None
+        self.derecho = None
+
+
+class ArbolBinarioBusqueda:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, valor):
+        if self.raiz is None:
+            self.raiz = Nodo(valor)
+            return
+        actual = self.raiz
+        while True:
+            if valor < actual.valor:
+                if actual.izquierdo is None:
+                    actual.izquierdo = Nodo(valor)
+                    return
+                actual = actual.izquierdo
+            elif valor > actual.valor:
+                if actual.derecho is None:
+                    actual.derecho = Nodo(valor)
+                    return
+                actual = actual.derecho
+            else:
+                return  # valor repetido, no se inserta
+
+    def altura(self, nodo):
+        if nodo is None:
+            return -1
+        return 1 + max(self.altura(nodo.izquierdo), self.altura(nodo.derecho))
+
+
+# Pruebas
+arbol = ArbolBinarioBusqueda()
+for x in [1, 2, 3, 4, 5]:
+    arbol.insertar(x)
+
+print("Altura (1,2,3,4,5):", arbol.altura(arbol.raiz))  # 4
+
+equilibrado = ArbolBinarioBusqueda()
+for x in [3, 2, 4, 1, 5]:
+    equilibrado.insertar(x)
+
+print("Altura (3,2,4,1,5):", equilibrado.altura(equilibrado.raiz))  # 2
+
+vacio = ArbolBinarioBusqueda()
+print("Altura (vacío):", vacio.altura(vacio.raiz))  # -1
