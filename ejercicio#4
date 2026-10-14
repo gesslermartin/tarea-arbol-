@@ -1,0 +1,62 @@
+contar hojas
+
+Una hoja es un nodo sin hijos.
+
+Caso base 1: si el nodo es None, aporta 0 hojas.
+Caso base 2: si no tiene hijo izquierdo ni derecho, es una hoja y devuelve 1.
+Caso recursivo: si tiene hijos, las hojas son las del subárbol izquierdo más las del derecho.
+
+El método público contar_hojas solo llama al auxiliar con la raíz, para que el usuario no tenga que pasarla.
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izquierdo = None
+        self.derecho = None
+
+
+class ArbolBinarioBusqueda:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, valor):
+        self.raiz = self._insertar(self.raiz, valor)
+
+    def _insertar(self, nodo, valor):
+        if nodo is None:
+            return Nodo(valor)
+        if valor < nodo.valor:
+            nodo.izquierdo = self._insertar(nodo.izquierdo, valor)
+        elif valor > nodo.valor:
+            nodo.derecho = self._insertar(nodo.derecho, valor)
+        return nodo
+
+    def postorden(self):
+        resultado = []
+        self._postorden(self.raiz, resultado)
+        return resultado
+
+    def _postorden(self, nodo, resultado):
+        if nodo is None:
+            return
+        self._postorden(nodo.izquierdo, resultado)
+        self._postorden(nodo.derecho, resultado)
+        resultado.append(nodo.valor)
+
+    def contar_hojas(self):
+        return self._contar_hojas_rec(self.raiz)
+
+    def _contar_hojas_rec(self, nodo):
+        if nodo is None:
+            return 0
+        if nodo.izquierdo is None and nodo.derecho is None:
+            return 1
+        return (self._contar_hojas_rec(nodo.izquierdo)
+                + self._contar_hojas_rec(nodo.derecho))
+
+
+arbol = ArbolBinarioBusqueda()
+for x in [10, 5, 15, 2, 7, 12, 17]:
+    arbol.insertar(x)
+
+print("Postorden:", arbol.postorden())
+print("Hojas:", arbol.contar_hojas())
