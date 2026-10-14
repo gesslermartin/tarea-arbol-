@@ -1,0 +1,17 @@
+concepto 
+Sistema de control de transporte es una aplicación web que permite administrar una flota de vehículos y los viajes que realiza, desde un solo lugar y de forma sencilla.\
+¿Qué hace?
+Registra vehículos con su placa, tipo y conductor asignado.
+Controla el estado de cada unidad: disponible, en ruta o en mantenimiento.
+Gestiona viajes: se asigna un vehículo disponible a una ruta (origen y destino), se anota la carga o los pasajeros y se registra la hora de salida.
+Cierra los viajes como finalizados o cancelados, y el vehículo queda libre otra vez automáticamente.
+Muestra un resumen con el total de vehículos y cuántos están disponibles, en ruta o en mantenimiento.
+Objetivo general
+
+Facilitar el control y la organización del transporte, para evitar errores y mejorar el uso de los vehículos disponibles.
+
+Objetivos específicos
+Mantener un registro ordenado de vehículos y conductores.
+Saber en tiempo real qué unidades están disponibles.
+Llevar un historial de los viajes realizados.
+Evitar asignar un vehículo que ya está ocupado o en mantenimiento.
