@@ -1,0 +1,47 @@
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izq = None
+        self.der = None
+
+
+class ABB:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, valor):
+        self.raiz = self._insertar(self.raiz, valor)
+
+    def _insertar(self, nodo, valor):
+        if nodo is None:
+            return Nodo(valor)
+        if valor < nodo.valor:
+            nodo.izq = self._insertar(nodo.izq, valor)
+        elif valor > nodo.valor:
+            nodo.der = self._insertar(nodo.der, valor)
+        return nodo
+
+    def altura(self):
+        return self._altura(self.raiz)
+
+    def _altura(self, nodo):
+        if nodo is None:
+            return -1  # árbol vacío = -1, así la altura cuenta aristas
+        return 1 + max(self._altura(nodo.izq), self._altura(nodo.der))
+
+    def mostrar(self, nodo=None, nivel=0, primero=True):
+        if primero:
+            nodo = self.raiz
+        if nodo is None:
+            return
+        print("    " * nivel + f"({nodo.valor})")
+        self.mostrar(nodo.izq, nivel + 1, False)
+        self.mostrar(nodo.der, nivel + 1, False)
+
+
+arbol = ABB()
+for x in [1, 2, 3, 4, 5]:
+    arbol.insertar(x)
+
+arbol.mostrar()
+print("Altura:", arbol.altura())
